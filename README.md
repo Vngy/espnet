@@ -1,9 +1,9 @@
 ESTransformer implementation of ESPNet with Echo State Network (ESN) / DeepESN by EchoTorch. Used in M.S. Thesis Research by Dan Adams (dwa6259@rit.edu) "The Application of Echo State Networks to Atypical Speech Recognition".
 
-Features:
-  ESN & DeepESN Frontend
-  Additional ESN Feature Extractor (ESN-FE)
-  Torgo dataset recipe files
+##Features:
+  - ESN & DeepESN Frontend
+  - Additional ESN Feature Extractor (ESN-FE)
+  - Torgo dataset recipe files
 
 
 
