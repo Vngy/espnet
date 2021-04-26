@@ -28,15 +28,17 @@ class GlobalMVN(AbsNormalize, InversibleInterface):
         stats_file: Union[Path, str],
         norm_means: bool = True,
         norm_vars: bool = True,
+        norm_trans: bool = False,
         eps: float = 1.0e-20,
     ):
         assert check_argument_types()
         super().__init__()
         self.norm_means = norm_means
         self.norm_vars = norm_vars
+        self.norm_trans = norm_trans
         self.eps = eps
         stats_file = Path(stats_file)
-
+        
         self.stats_file = stats_file
         stats = np.load(stats_file)
         if isinstance(stats, np.ndarray):
@@ -52,7 +54,7 @@ class GlobalMVN(AbsNormalize, InversibleInterface):
             mean = sum_v / count
             var = sum_square_v / count - mean * mean
         std = np.sqrt(np.maximum(var, eps))
-
+        print("Stats: ", stats, "\tMean: ", mean)
         self.register_buffer("mean", torch.from_numpy(mean))
         self.register_buffer("std", torch.from_numpy(std))
 
@@ -71,6 +73,9 @@ class GlobalMVN(AbsNormalize, InversibleInterface):
             x: (B, L, ...)
             ilens: (B,)
         """
+        print("Global MVN input lengths: ", ilens, "\t x shape: ", x.shape)
+        if(self.norm_trans):
+            x = torch.transpose(x, 2, 1)
         if ilens is None:
             ilens = x.new_full([x.size(0)], x.size(1))
         norm_means = self.norm_means
@@ -78,12 +83,13 @@ class GlobalMVN(AbsNormalize, InversibleInterface):
         self.mean = self.mean.to(x.device, x.dtype)
         self.std = self.std.to(x.device, x.dtype)
         mask = make_pad_mask(ilens, x, 1)
-
         # feat: (B, T, D)
         if norm_means:
             if x.requires_grad:
                 x = x - self.mean
             else:
+                print("x shape: ", x.shape)
+                print("mean shape: ", self.mean.shape)
                 x -= self.mean
         if x.requires_grad:
             x = x.masked_fill(mask, 0.0)
@@ -92,7 +98,10 @@ class GlobalMVN(AbsNormalize, InversibleInterface):
 
         if norm_vars:
             x /= self.std
-
+        
+        if(self.norm_trans):
+            x = torch.transpose(x, 2, 1)
+        
         return x, ilens
 
     def inverse(

@@ -91,13 +91,13 @@ class TCNSeparator(AbsSeparator):
         masks = masks.transpose(2, 3)  # B, num_spk, L, N
         masks = masks.unbind(dim=1)  # List[B, L, N]
 
-        masked = [input * m for m in masks]
+        maksed = [input * m for m in masks]
 
         others = OrderedDict(
             zip(["mask_spk{}".format(i + 1) for i in range(len(masks))], masks)
         )
 
-        return masked, ilens, others
+        return maksed, ilens, others
 
     @property
     def num_spk(self):

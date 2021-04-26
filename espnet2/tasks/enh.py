@@ -13,16 +13,12 @@ from typeguard import check_return_type
 
 from espnet2.enh.decoder.abs_decoder import AbsDecoder
 from espnet2.enh.decoder.conv_decoder import ConvDecoder
-from espnet2.enh.decoder.null_decoder import NullDecoder
 from espnet2.enh.decoder.stft_decoder import STFTDecoder
 from espnet2.enh.encoder.abs_encoder import AbsEncoder
 from espnet2.enh.encoder.conv_encoder import ConvEncoder
-from espnet2.enh.encoder.null_encoder import NullEncoder
 from espnet2.enh.encoder.stft_encoder import STFTEncoder
 from espnet2.enh.espnet_model import ESPnetEnhancementModel
 from espnet2.enh.separator.abs_separator import AbsSeparator
-from espnet2.enh.separator.asteroid_models import AsteroidModel_Converter
-from espnet2.enh.separator.conformer_separator import ConformerSeparator
 from espnet2.enh.separator.dprnn_separator import DPRNNSeparator
 from espnet2.enh.separator.neural_beamformer import NeuralBeamformer
 from espnet2.enh.separator.rnn_separator import RNNSeparator
@@ -40,7 +36,7 @@ from espnet2.utils.types import str_or_none
 
 encoder_choices = ClassChoices(
     name="encoder",
-    classes=dict(stft=STFTEncoder, conv=ConvEncoder, same=NullEncoder),
+    classes=dict(stft=STFTEncoder, conv=ConvEncoder),
     type_check=AbsEncoder,
     default="stft",
 )
@@ -52,9 +48,7 @@ separator_choices = ClassChoices(
         tcn=TCNSeparator,
         dprnn=DPRNNSeparator,
         transformer=TransformerSeparator,
-        conformer=ConformerSeparator,
         wpe_beamformer=NeuralBeamformer,
-        asteroid=AsteroidModel_Converter,
     ),
     type_check=AbsSeparator,
     default="rnn",
@@ -62,7 +56,7 @@ separator_choices = ClassChoices(
 
 decoder_choices = ClassChoices(
     name="decoder",
-    classes=dict(stft=STFTDecoder, conv=ConvDecoder, same=NullDecoder),
+    classes=dict(stft=STFTDecoder, conv=ConvDecoder),
     type_check=AbsDecoder,
     default="stft",
 )

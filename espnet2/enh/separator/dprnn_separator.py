@@ -105,13 +105,13 @@ class DPRNNSeparator(AbsSeparator):
         processed = processed.view(B, T, N, self.num_spk)
         masks = self.nonlinear(processed).unbind(dim=3)
 
-        masked = [input * m for m in masks]
+        maksed = [input * m for m in masks]
 
         others = OrderedDict(
             zip(["mask_spk{}".format(i + 1) for i in range(len(masks))], masks)
         )
 
-        return masked, ilens, others
+        return maksed, ilens, others
 
     @property
     def num_spk(self):

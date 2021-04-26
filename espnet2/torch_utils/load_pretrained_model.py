@@ -75,7 +75,9 @@ def load_pretrained_model(
             for k, v in src_state.items()
             if k.startswith(src_key)
         }
-
+        
     dst_state = obj.state_dict()
+    if src_key is None:
+        src_state = {k: v for k, v in src_state.items() if k in dst_state}    
     dst_state.update(src_state)
     obj.load_state_dict(dst_state)

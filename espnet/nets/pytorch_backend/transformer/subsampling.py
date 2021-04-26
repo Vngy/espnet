@@ -50,9 +50,12 @@ class Conv2dSubsampling(torch.nn.Module):
 
     """
 
-    def __init__(self, idim, odim, dropout_rate, pos_enc=None):
+    def __init__(self, idim, odim, dropout_rate, pos_enc=None, conv_transpose=False):
         """Construct an Conv2dSubsampling object."""
         super(Conv2dSubsampling, self).__init__()
+        self.idim = idim
+        self.odim = odim
+        self.transpose=conv_transpose   
         self.conv = torch.nn.Sequential(
             torch.nn.Conv2d(1, odim, 3, 2),
             torch.nn.ReLU(),
@@ -79,8 +82,13 @@ class Conv2dSubsampling(torch.nn.Module):
 
         """
         x = x.unsqueeze(1)  # (b, c, t, f)
+        print("pre-conv2d: x size: ", x.shape, "\tinput dim:", self.idim)
+        if(self.transpose):
+            x = torch.transpose(x, 2, 3)
         x = self.conv(x)
+        print("conv2d: x size: ", x.shape)
         b, c, t, f = x.size()
+        print("needs to fit layer input: ", self.odim*(((self.idim-1)//2-1)//2), "\tand layer out size:", self.odim)
         x = self.out(x.transpose(1, 2).contiguous().view(b, t, c * f))
         if x_mask is None:
             return x, None
@@ -109,9 +117,12 @@ class Conv2dSubsampling6(torch.nn.Module):
 
     """
 
-    def __init__(self, idim, odim, dropout_rate, pos_enc=None):
+    def __init__(self, idim, odim, dropout_rate, pos_enc=None, conv_transpose=False):
         """Construct an Conv2dSubsampling6 object."""
         super(Conv2dSubsampling6, self).__init__()
+        self.transpose=conv_transpose   
+        self.idim = idim
+        self.odim = odim
         self.conv = torch.nn.Sequential(
             torch.nn.Conv2d(1, odim, 3, 2),
             torch.nn.ReLU(),
@@ -138,8 +149,15 @@ class Conv2dSubsampling6(torch.nn.Module):
 
         """
         x = x.unsqueeze(1)  # (b, c, t, f)
+        print("pre-conv2d: x size: ", x.shape, "\tinput dim:", self.idim)
+        #if(self.transpose):
+        #    x = torch.transpose(x, 2, 3)
+
+
         x = self.conv(x)
+        print("conv2d: x size: ", x.shape)
         b, c, t, f = x.size()
+        print("needs to fit layer input: ", self.odim*(((self.idim-1)//2-2)//3), "\tand layer out size:", self.odim)
         x = self.out(x.transpose(1, 2).contiguous().view(b, t, c * f))
         if x_mask is None:
             return x, None

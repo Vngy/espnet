@@ -260,15 +260,21 @@ class SubReporter:
         self.register({name: t})
 
     def measure_iter_time(self, iterable, name: str):
+        print("measuring iteration time")
+        print(iterable)
         iterator = iter(iterable)
+        print("good with iterator")
         while True:
+            print("measure iter time loop")
             try:
                 start = time.perf_counter()
                 retval = next(iterator)
                 t = time.perf_counter() - start
+                print("measure iter time t = \t",t)
                 self.register({name: t})
                 yield retval
             except StopIteration:
+                print("beaking")
                 break
 
 
@@ -349,14 +355,6 @@ class Reporter:
             seconds=time.perf_counter() - sub_reporter.start_time
         )
         stats["total_count"] = sub_reporter.total_count
-        if LooseVersion(torch.__version__) >= LooseVersion("1.4.0"):
-            if torch.cuda.is_initialized():
-                stats["gpu_max_cached_mem_GB"] = (
-                    torch.cuda.max_memory_reserved() / 2 ** 30
-                )
-        else:
-            if torch.cuda.is_available() and torch.cuda.max_memory_cached() > 0:
-                stats["gpu_cached_mem_GB"] = torch.cuda.max_memory_cached() / 2 ** 30
 
         self.stats.setdefault(self.epoch, {})[sub_reporter.key] = stats
         sub_reporter.finished()
@@ -498,6 +496,7 @@ class Reporter:
             p = output_dir / f"{key2}.png"
             p.parent.mkdir(parents=True, exist_ok=True)
             plt.savefig(p)
+                
 
     def _plot_stats(self, keys: Sequence[str], key2: str):
         assert check_argument_types()

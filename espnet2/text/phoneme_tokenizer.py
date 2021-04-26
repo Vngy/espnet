@@ -1,7 +1,6 @@
 from pathlib import Path
 from typing import Iterable
 from typing import List
-from typing import Optional
 from typing import Union
 
 import g2p_en
@@ -107,41 +106,6 @@ class G2p_en:
         return phones
 
 
-class Phonemizer:
-    """Phonemizer module for various languages.
-
-    This is wrapper module of https://github.com/bootphon/phonemizer.
-    You can define various g2p modules by specifying options for phonemizer.
-
-    See available options:
-        https://github.com/bootphon/phonemizer/blob/master/phonemizer/phonemize.py#L32
-
-    """
-
-    def __init__(
-        self,
-        word_separator: Optional[str] = None,
-        syllable_separator: Optional[str] = None,
-        **phonemize_kwargs,
-    ):
-        # delayed import
-        from phonemizer import phonemize
-        from phonemizer.separator import Separator
-
-        self.phonemize = phonemize
-        self.separator = Separator(
-            word=word_separator, syllable=syllable_separator, phone=" "
-        )
-        self.phonemize_kwargs = phonemize_kwargs
-
-    def __call__(self, text) -> List[str]:
-        return self.phonemize(
-            text,
-            separator=self.separator,
-            **self.phonemize_kwargs,
-        ).split()
-
-
 class PhonemeTokenizer(AbsTokenizer):
     def __init__(
         self,
@@ -169,8 +133,6 @@ class PhonemeTokenizer(AbsTokenizer):
             self.g2p = pypinyin_g2p
         elif g2p_type == "pypinyin_g2p_phone":
             self.g2p = pypinyin_g2p_phone
-        elif g2p_type == "espeak_ng_arabic":
-            self.g2p = Phonemizer(language="ar", backend="espeak", with_stress=True)
         else:
             raise NotImplementedError(f"Not supported: g2p_type={g2p_type}")
 

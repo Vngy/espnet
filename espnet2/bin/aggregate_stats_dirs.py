@@ -56,6 +56,8 @@ def aggregate_stats_dirs(
                         sum_stats = dict(**stats)
                     else:
                         for k in stats:
+                            if (type(stats[k])==type(np.array([])) and type(sum_stats[k]) == type(np.array([]))):
+                                print("len Stats k: ", stats[k].shape, "\t len Sum stats k: ", sum_stats[k].shape)
                             sum_stats[k] += stats[k]
 
                 np.savez(output_dir / mode / f"{key}_stats.npz", **sum_stats)

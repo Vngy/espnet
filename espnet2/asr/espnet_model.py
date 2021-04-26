@@ -95,6 +95,7 @@ class ESPnetASRModel(AbsESPnetModel):
             )
         else:
             self.error_calculator = None
+        print("Initialized ASR Model")
 
     def forward(
         self,
@@ -111,6 +112,7 @@ class ESPnetASRModel(AbsESPnetModel):
             text: (Batch, Length)
             text_lengths: (Batch,)
         """
+        print("ASR Model Forward")
         assert text_lengths.dim() == 1, text_lengths.shape
         # Check that batch_size is unified
         assert (
@@ -123,9 +125,10 @@ class ESPnetASRModel(AbsESPnetModel):
 
         # for data-parallel
         text = text[:, : text_lengths.max()]
-
+        print("Data parallel ended")
         # 1. Encoder
         encoder_out, encoder_out_lens = self.encode(speech, speech_lengths)
+        print("Encoder Forward Ended")
 
         # 2a. Attention-decoder branch
         if self.ctc_weight == 1.0:
@@ -187,17 +190,22 @@ class ESPnetASRModel(AbsESPnetModel):
             speech: (Batch, Length, ...)
             speech_lengths: (Batch, )
         """
+        print("Starting Encode Transformer Operation")
         with autocast(False):
             # 1. Extract feats
+            print("Extracting features")  
             feats, feats_lengths = self._extract_feats(speech, speech_lengths)
-
+            print("Augmenting Features")
             # 2. Data augmentation
             if self.specaug is not None and self.training:
                 feats, feats_lengths = self.specaug(feats, feats_lengths)
 
             # 3. Normalization for feature: e.g. Global-CMVN, Utterance-CMVN
+            print("normalizing features")
             if self.normalize is not None:
                 feats, feats_lengths = self.normalize(feats, feats_lengths)
+            print("Features are normalized")
+        print("Features are extracted, augmented, and normalized")
 
         # Pre-encoder, e.g. used for raw input data
         if self.preencoder is not None:
@@ -206,6 +214,7 @@ class ESPnetASRModel(AbsESPnetModel):
         # 4. Forward encoder
         # feats: (Batch, Length, Dim)
         # -> encoder_out: (Batch, Length2, Dim2)
+        print("Going into encoder forward")
         encoder_out, encoder_out_lens, _ = self.encoder(feats, feats_lengths)
 
         assert encoder_out.size(0) == speech.size(0), (
@@ -295,3 +304,4 @@ class ESPnetASRModel(AbsESPnetModel):
         ys_pad_lens: torch.Tensor,
     ):
         raise NotImplementedError
+

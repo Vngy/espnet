@@ -38,6 +38,7 @@ class DefaultFrontend(AbsFrontend):
         htk: bool = False,
         frontend_conf: Optional[dict] = get_default_kwargs(Frontend),
         apply_stft: bool = True,
+        apply_logmel: bool = True,
     ):
         assert check_argument_types()
         super().__init__()
@@ -65,16 +66,19 @@ class DefaultFrontend(AbsFrontend):
             self.frontend = Frontend(idim=n_fft // 2 + 1, **frontend_conf)
         else:
             self.frontend = None
-
-        self.logmel = LogMel(
-            fs=fs,
-            n_fft=n_fft,
-            n_mels=n_mels,
-            fmin=fmin,
-            fmax=fmax,
-            htk=htk,
-        )
-        self.n_mels = n_mels
+        
+        if apply_logmel:
+            self.logmel = LogMel(
+                fs=fs,
+                n_fft=n_fft,
+                n_mels=n_mels,
+                fmin=fmin,
+                fmax=fmax,
+                htk=htk,
+            )
+            self.n_mels = n_mels
+        else:
+            self.n_mels = 0
 
     def output_size(self) -> int:
         return self.n_mels
@@ -113,7 +117,7 @@ class DefaultFrontend(AbsFrontend):
         # input_power: (Batch, [Channel,] Length, Freq)
         #       -> input_feats: (Batch, Length, Dim)
         input_feats, _ = self.logmel(input_power, feats_lens)
-
+        print("input feats shape: ", input_feats.shape, "\tInput Feats length: ", len(feats_lens))
         return input_feats, feats_lens
 
     def _compute_stft(
